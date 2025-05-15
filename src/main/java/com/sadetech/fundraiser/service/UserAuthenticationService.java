@@ -9,6 +9,7 @@ import com.sadetech.fundraiser.utility.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,6 +57,9 @@ public class UserAuthenticationService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     public Otp registerWithMobileNumber(String phoneNumber) {
 
@@ -497,6 +501,32 @@ public class UserAuthenticationService {
         bloodDonor.setUserId(userId);
         bloodDonorRepository.save(bloodDonor);
         return "Blood donor details saved successfully!";
+    }
+
+    public BloodDonorDetails getBloodDonorDetails(Long userId) {
+
+        BloodDonorDetails bloodDonorDetails = new BloodDonorDetails();
+
+        BloodDonor bloodDonor = bloodDonorRepository.findByUserId(userId);
+        if(bloodDonor == null){
+            throw new ResourceNotFoundException("Blood donor details not found for this user.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        bloodDonorDetails.setUserId(user.getId());;
+        bloodDonorDetails.setFullName(user.getFullName());
+        bloodDonorDetails.setPhoneNumber(user.getPhoneNumber());
+        bloodDonorDetails.setEmail(user.getEmail());
+        bloodDonorDetails.setBloodGroup(bloodDonor.getBloodGroup());
+        bloodDonorDetails.setAlternateMobileNumber(bloodDonor.getAlternateMobileNumber());
+        bloodDonorDetails.setCountry(bloodDonor.getCountry());
+        bloodDonorDetails.setState(bloodDonor.getState());
+        bloodDonorDetails.setDistrict(bloodDonor.getDistrict());
+        bloodDonorDetails.setCity(bloodDonor.getCity());
+
+        return bloodDonorDetails;
     }
 
 }

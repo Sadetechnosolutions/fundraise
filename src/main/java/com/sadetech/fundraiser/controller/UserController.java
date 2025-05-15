@@ -146,4 +146,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
     }
 
+    @GetMapping("/donor-details")
+    public ResponseEntity<BloodDonorDetails> getBloodDonorDetails(@RequestParam Long userId) {
+        BloodDonorDetails donorDetails = userAuthenticationService.getBloodDonorDetails(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(donorDetails);
+    }
+
 }
