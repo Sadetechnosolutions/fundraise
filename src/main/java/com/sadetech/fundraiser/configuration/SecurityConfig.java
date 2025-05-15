@@ -39,9 +39,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers("/api/fund-raiser/register-mobile",
-                                "/api/fund-raiser/verify-otp-register",
-                                "/api/fund-raiser/get-all-otp",
-                                "/api/fund-raiser/patient-info",
+                                "/api/fund-raiser/verify-otp-register-login",
+                                "/api/fund-raiser/send-otp-to-mobile",
                                 "/api/fund-raiser/uploads/**"
                         ).permitAll()
                         .anyRequest().authenticated()

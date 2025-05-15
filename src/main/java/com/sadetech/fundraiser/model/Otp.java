@@ -27,5 +27,13 @@ public class Otp {
     @CreationTimestamp
     private LocalDateTime createdAt;
     private boolean used;
+
+    public Otp(String to, String otp, String otpType, String text, LocalDateTime now, boolean b) {
+    }
+
+    public boolean getIsUsed() {
+        return used;
+    }
+
 }
 

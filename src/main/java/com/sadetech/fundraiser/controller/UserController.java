@@ -3,12 +3,13 @@ package com.sadetech.fundraiser.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sadetech.fundraiser.dto.*;
+import com.sadetech.fundraiser.model.BloodDonor;
 import com.sadetech.fundraiser.model.Otp;
+import com.sadetech.fundraiser.model.User;
 import com.sadetech.fundraiser.service.UserAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -20,14 +21,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/fund-raiser")
@@ -43,7 +41,7 @@ public class UserController {
     private String uploadDir;
 
     @PostMapping("/register-mobile")
-    public ResponseEntity<?> registerWithMobileNumber(@RequestBody MobileRegisterRequest request) {
+    public ResponseEntity<?> registerWithMobileNumber(@Valid @RequestBody MobileRegisterRequest request) {
         Otp response = userAuthenticationService.registerWithMobileNumber(
                 request.getPhoneNumber());
 
@@ -51,20 +49,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(otpResponse);
     }
 
-    @PostMapping("/verify-otp-register")
+    @PostMapping("/send-otp-to-mobile")
+    public ResponseEntity<?> sendOtp(@Valid @RequestBody LoginRequest request) {
+        Otp otp = userAuthenticationService.sendOtpToPhoneNumber(request.getInput());
+        OtpResponse otpResponse = modelMapper.map(otp,OtpResponse.class);
+        return new ResponseEntity<>(otpResponse, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/verify-otp-register-login")
     public ResponseEntity<LoginResponse> verifyOtpAndRegisterForPhoneNumber(
-            @RequestBody VerificationRequest verificationRequest) {
-        LoginResponse response = userAuthenticationService.verifyOtpAndRegisterForPhoneNumber(
+           @Valid @RequestBody VerificationRequest verificationRequest) {
+        LoginResponse response = userAuthenticationService.verifyOtpAndRegisterOrLoginForPhoneNumber(
                 verificationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> userLogin(@RequestParam(required = false) String email, @RequestParam(required = false) String phoneNumber, @RequestParam String password, HttpServletRequest request) {
-        LoginResponse response = userAuthenticationService.loginWithPhoneNumberOrEmail(email, phoneNumber, password,request);
-        return ResponseEntity.ok(response);
-    }
-
 
     @GetMapping("/get-all-otp")
     public ResponseEntity<?> getAllOtp() {
@@ -76,13 +74,13 @@ public class UserController {
             @RequestPart("patientImage") MultipartFile patientImage,
             @RequestPart("reportsImages") List<MultipartFile> reportsImages,
             @RequestPart("patientRequestDto") String patientRequestDtoStr,
-            HttpServletRequest request) throws FileUploadException, JsonProcessingException {
+            HttpServletRequest request) throws FileUploadException, JsonProcessingException, FileNotFoundException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        PatientRequestDto patientRequestDto = objectMapper.readValue(patientRequestDtoStr, PatientRequestDto.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            PatientRequestDto patientRequestDto = objectMapper.readValue(patientRequestDtoStr, PatientRequestDto.class);
 
-        String response = userAuthenticationService.patientInfo(patientImage, reportsImages, patientRequestDto, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(response));
+            String response = userAuthenticationService.patientInfo(patientImage, reportsImages, patientRequestDto, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(response));
     }
 
     @GetMapping("/patient-info")
@@ -122,6 +120,30 @@ public class UserController {
         }else {
             return "application/octet-stream";
         }
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<User> getUserInfo(@RequestParam Long userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(userAuthenticationService.getUserById(userId));
+    }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<ApiResponse> updateUserProfile(
+            @Valid @RequestBody EditProfileRequest editProfileRequest,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+
+        String response = userAuthenticationService.updateProfile(editProfileRequest,authHeader);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
+    }
+
+    @PostMapping("/add-donor-details")
+    public ResponseEntity<ApiResponse> addDonorDetails(
+            @Valid @RequestBody BloodDonor donorDetailsRequest,
+            HttpServletRequest request
+    ) {
+        String response = userAuthenticationService.addBloodDonorDetails(donorDetailsRequest, request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
     }
 
 }

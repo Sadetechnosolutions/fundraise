@@ -25,6 +25,7 @@ public class FileUploadService {
     private String uploadDir;
 
     public String uploadFile(MultipartFile file) throws FileUploadException {
+
          if (file.isEmpty()) {
              throw new FileUploadException("Failed to upload file: empty file");
          }
@@ -82,7 +83,6 @@ public class FileUploadService {
 
         return uploadedUrls;
     }
-
 
     private String encodeFileName(String fileName) {
         String[] parts = fileName.split(" at ");

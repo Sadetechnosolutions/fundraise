@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface OtpRepository extends JpaRepository<Otp, Long> {
     Optional<Otp> findFirstByPhoneNumberAndUsedFalseAndOtpTypeOrderByCreatedAtDesc(String phoneNumber, String otpType);
 
-    List<Otp> findByPhoneNumber(String phoneNumber);
+    Optional<Otp> findFirstByPhoneNumberAndUsedFalseOrderByCreatedAtDesc(String phoneNumber);
+
+    Optional<Otp> findFirstByEmailAndUsedFalseOrderByCreatedAtDesc(String email);
 }
