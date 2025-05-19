@@ -2,6 +2,7 @@ package com.sadetech.fundraiser.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -191,4 +192,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, WebRequest request) {
+        StringBuilder errorMessages = new StringBuilder();
+        ex.getBindingResult().getAllErrors().forEach(error -> errorMessages.append(error.getDefaultMessage()).append("; "));
+        ErrorResponse errorResponse = new ErrorResponse(
+                errorMessages.toString().trim(),
+                400,
+                "MethodArgumentNotValidException",
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 }

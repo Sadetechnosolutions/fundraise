@@ -22,5 +22,7 @@ public class BloodDonor {
     private String state;
     private String district;
     private String city;
+    private String townOrVillage;
+    private String pincode;
 
 }

@@ -107,9 +107,11 @@ public class UserAuthenticationService {
         input = input.trim();
         Otp otp = new Otp();
 
+        String email;
+
         if (input.contains("@")) {
             // ✅ Email flow
-            String email = input;
+             email = input;
 
             // Optional: Add email format validation
             if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
@@ -515,7 +517,7 @@ public class UserAuthenticationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        bloodDonorDetails.setUserId(user.getId());;
+        bloodDonorDetails.setUserId(user.getId());
         bloodDonorDetails.setFullName(user.getFullName());
         bloodDonorDetails.setPhoneNumber(user.getPhoneNumber());
         bloodDonorDetails.setEmail(user.getEmail());
@@ -525,6 +527,8 @@ public class UserAuthenticationService {
         bloodDonorDetails.setState(bloodDonor.getState());
         bloodDonorDetails.setDistrict(bloodDonor.getDistrict());
         bloodDonorDetails.setCity(bloodDonor.getCity());
+        bloodDonorDetails.setTownOrVillage(bloodDonor.getTownOrVillage());
+        bloodDonorDetails.setPincode(bloodDonor.getPincode());
 
         return bloodDonorDetails;
     }
