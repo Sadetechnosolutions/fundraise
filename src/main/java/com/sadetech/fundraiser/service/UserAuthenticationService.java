@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,9 @@ public class UserAuthenticationService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private GoogleAuthService googleAuthService;
+
     public Otp registerWithMobileNumber(String phoneNumber) {
 
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
@@ -103,7 +107,8 @@ public class UserAuthenticationService {
         return otpRepository.save(otpEntity);
     }
 
-    public Otp sendOtpToPhoneNumber(String input) {
+    public Otp sendOtpToPhoneNumber(LoginRequest loginRequest) {
+        String input = loginRequest.getInput();
         input = input.trim();
         Otp otp = new Otp();
 
@@ -174,11 +179,11 @@ public class UserAuthenticationService {
         return otpRepository.save(otp);
     }
 
-    public LoginResponse verifyOtpAndRegisterOrLoginForPhoneNumber(VerificationRequest verificationRequest) {
+    public LoginResponse verifyOtpAndRegisterForPhoneNumber(VerificationRequest verificationRequest) {
 
         LoginResponse response = new LoginResponse();
 
-        String phoneNumber = verificationRequest.getPhoneNumber();
+        String phoneNumber = verificationRequest.getInput();
         String otpCode = verificationRequest.getOtp();
 
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
@@ -223,12 +228,12 @@ public class UserAuthenticationService {
             }
 
 
-            // ✅ Check if user already exists
+            // ✅ Check if the user already exists
             if (userRepository.findByPhoneNumber(phoneNumber).isPresent()) {
                 throw new IllegalArgumentException("Phone number already registered. Please log in.");
             }
 
-            // ✅ Create and save new user
+            // ✅ Create and save a new user
             User newUser = new User();
             newUser.setPhoneNumber(phoneNumber);
             newUser.setRole(new HashSet<>(List.of("USER")));
@@ -251,7 +256,118 @@ public class UserAuthenticationService {
             response.setMessage("Successfully Registered & Logged In");
 
             return response;
-        }else if(otpEntity.getOtpType().equalsIgnoreCase("Login")){
+        }else {
+            throw new InvalidOtpException("Invalid OTP type.");
+        }
+    }
+
+    public LoginResponse verifyOtpAndLoginForEmailOrPhoneNumber(VerificationRequest verificationRequest) {
+
+        LoginResponse response = new LoginResponse();
+        String input = verificationRequest.getInput();
+        String otpCode = verificationRequest.getOtp();
+        String email = null;
+
+        if (input.contains("@")) {
+            email = input;
+
+            if (email.trim().isEmpty()) {
+                throw new InvalidPhoneNumberException("Email is required.");
+            }
+
+            if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
+                throw new IllegalArgumentException("Invalid email format.");
+            }
+
+            if (otpCode == null || otpCode.trim().isEmpty()) {
+                throw new InvalidOtpException("Please enter otp.");
+            }
+
+            otpCode = otpCode.replaceAll("\\s+", "");
+
+            if (!otpCode.matches("\\d{6}")) {
+                throw new InvalidOtpException("Invalid OTP format.");
+            }
+
+            // ✅ Get the latest unused OTP for this phone number
+            Optional<Otp> otpEntityOpt = otpRepository.findFirstByEmailAndUsedFalseOrderByCreatedAtDesc(email);
+
+            if (otpEntityOpt.isEmpty()) {
+                throw new InvalidOtpException("Invalid or expired OTP. Please request a new one.");
+            }
+
+            Otp otpEntity = otpEntityOpt.get();
+
+            if(!otpEntity.getOtpType().equalsIgnoreCase("Login")){
+                throw new InvalidOtpException("Invalid OTP type.");
+            }
+
+            if (!otpEntity.getOtp().equals(otpCode)) {
+                throw new InvalidOtpException("This OTP is no longer valid. Please use the latest OTP sent");
+            }
+
+            if (otpEntity.getIsUsed()) {
+                throw new InvalidOtpException("OTP has already been used.");
+            }
+
+            if (LocalDateTime.now().isAfter(otpEntity.getCreatedAt().plusMinutes(5))) {
+                throw new OtpExpiredException("OTP has expired. Request new otp.");
+            }
+
+            // ✅ OTP is valid here — generate token only now
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            String jwt = jwtUtils.generateToken(user);
+            String refreshToken = jwtUtils.generateRefreshToken(user);
+
+            userRepository.save(user);
+
+            otpEntity.setUsed(true);
+            otpRepository.save(otpEntity);
+
+
+            response.setId( user.getId());
+            response.setToken(jwt);
+            response.setRefreshToken(refreshToken);
+            response.setMessage("Welcome to Fund Raiser's!");
+
+            return response;
+        } else {
+            // ✅ Phone number flow
+            String phoneNumber = input.replaceAll("\\s+", "");
+            if (phoneNumber.trim().isEmpty()) {
+                throw new InvalidPhoneNumberException("Phone number is required.");
+            }
+
+            phoneNumber = phoneNumber.replaceAll("\\s+", "");
+
+            if (phoneNumber.startsWith("0") || !phoneNumber.matches("^[6-9]\\d{9}$")) {
+                throw new InvalidPhoneNumberException("Invalid phone number format.");
+            }
+
+            if (otpCode == null || otpCode.trim().isEmpty()) {
+                throw new InvalidOtpException("Please enter otp.");
+            }
+
+            otpCode = otpCode.replaceAll("\\s+", "");
+
+            if (!otpCode.matches("\\d{6}")) {
+                throw new InvalidOtpException("Invalid OTP format.");
+            }
+
+            // ✅ Get the latest unused OTP for this phone number
+            Optional<Otp> otpEntityOpt = otpRepository.findFirstByPhoneNumberAndUsedFalseOrderByCreatedAtDesc(phoneNumber);
+
+            if (otpEntityOpt.isEmpty()) {
+                throw new InvalidOtpException("Invalid or expired OTP. Please request a new one.");
+            }
+
+            Otp otpEntity = otpEntityOpt.get();
+            if(!otpEntity.getOtpType().equalsIgnoreCase("Login")){
+                throw new InvalidOtpException("Invalid OTP type.");
+            }
+
             if (!otpEntity.getOtp().equals(otpCode)) {
                 throw new InvalidOtpException("This OTP is no longer valid. Please use the latest OTP sent");
             }
@@ -284,7 +400,6 @@ public class UserAuthenticationService {
 
             return response;
         }
-        throw new InvalidOtpException("Invalid OTP type.");
     }
 
     private String generateOtp() {
@@ -419,6 +534,10 @@ public class UserAuthenticationService {
 
     public String updateProfile(EditProfileRequest editProfileRequest, String authHeader) {
 
+        String firstName = editProfileRequest.getFirstName();
+        String lastName = editProfileRequest.getLastName();
+        String fullName = editProfileRequest.getFullName();
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Invalid Authorization header format");
         }
@@ -430,39 +549,42 @@ public class UserAuthenticationService {
             throw new UnAuthorizedAccessException("Access denied.");
         }
 
-        if ((editProfileRequest.getFirstName() == null || editProfileRequest.getFirstName().isBlank()) &&
-                (editProfileRequest.getLastName() == null || editProfileRequest.getLastName().isBlank()) &&
-                (editProfileRequest.getFullName() == null || editProfileRequest.getFullName().isBlank())) {
+        if ((firstName == null || firstName.isBlank()) &&
+                (lastName == null || lastName.isBlank()) &&
+                (fullName == null || fullName.isBlank())) {
             throw new InvalidInputException("Something went wrong, update any one of the field.");
         }
 
         User user = userRepository.findById(editProfileRequest.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
-        if ((editProfileRequest.getFirstName() == null || user.getFirstName().equals(editProfileRequest.getFirstName())) &&
-                (editProfileRequest.getLastName() == null || user.getLastName().equalsIgnoreCase(editProfileRequest.getLastName())) &&
-                (editProfileRequest.getFullName() == null || user.getFullName().equalsIgnoreCase(editProfileRequest.getFullName()))) {
+        if(user.getFirstName() == null && user.getLastName() == null && user.getFullName() == null){
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setFullName(fullName);
+
+            userRepository.save(user);
+            return "Profile saved successfully";
+        }
+
+        if ((firstName == null || Objects.equals(user.getFirstName(), firstName)) &&
+                (lastName == null || Objects.requireNonNull(user.getLastName()).equalsIgnoreCase(lastName)) &&
+                (fullName == null || user.getFullName().equalsIgnoreCase(fullName))) {
             return "Profile saved with no changes";
         }
 
         // Handle First Name
-        if (editProfileRequest.getFirstName() != null && !editProfileRequest.getFirstName().trim().isEmpty()) {
-            String firstName = editProfileRequest.getFirstName().trim();
-            validateName(firstName, "First name");
+        if (firstName != null && !firstName.trim().isEmpty()) {
             user.setFirstName(firstName);
         }
 
         // Handle Last Name
-        if (editProfileRequest.getLastName() != null && !editProfileRequest.getLastName().trim().isEmpty()) {
-            String lastName = editProfileRequest.getLastName().trim();
-            validateName(lastName, "Last name");
+        if (lastName != null && !lastName.trim().isEmpty()) {
             user.setLastName(lastName);
         }
 
         // Handle Full Name
-        if (editProfileRequest.getFullName() != null && !editProfileRequest.getFullName().trim().isEmpty()) {
-            String fullName = editProfileRequest.getFullName().trim();
-            validateName(fullName, "Full name");
+        if (fullName != null && !fullName.trim().isEmpty()) {
             user.setFullName(fullName);
         }
 
@@ -528,9 +650,46 @@ public class UserAuthenticationService {
         bloodDonorDetails.setDistrict(bloodDonor.getDistrict());
         bloodDonorDetails.setCity(bloodDonor.getCity());
         bloodDonorDetails.setTownOrVillage(bloodDonor.getTownOrVillage());
-        bloodDonorDetails.setPincode(bloodDonor.getPincode());
+        bloodDonorDetails.setPinCode(bloodDonor.getPinCode());
 
         return bloodDonorDetails;
     }
 
-}
+    public LoginResponse checkUserAndRegisterWithOAuth(String idToken) {
+
+        if (idToken == null || idToken.isBlank()) {
+            throw new IllegalArgumentException("Id token should not be null");
+        }
+
+        // Step 1: Verify Google ID Token and get email
+        String email = googleAuthService.verifyGoogleToken(idToken);
+
+        // Step 2: Check if the user already exists
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User savedUser = optionalUser.get();
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setId(savedUser.getId());
+            loginResponse.setToken(jwtUtils.generateToken(savedUser));
+            loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
+            loginResponse.setMessage("Successfully Logged In");
+            return loginResponse;
+        }
+
+        // Step 4: Register a new user
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setRole(new HashSet<>(List.of("USER")));
+
+        User savedUser = userRepository.save(newUser);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setId(savedUser.getId());
+        loginResponse.setToken(jwtUtils.generateToken(savedUser));
+        loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
+        loginResponse.setMessage("Successfully Registered & Logged In");
+
+        return loginResponse;
+    }
+
+}   // End of UserAuthenticationService class

@@ -50,17 +50,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(otpResponse);
     }
 
+    @PostMapping("/verify-otp-register")
+    public ResponseEntity<LoginResponse> verifyOtpAndRegisterForPhoneNumber(
+           @Valid @RequestBody VerificationRequest verificationRequest) {
+        LoginResponse response = userAuthenticationService.verifyOtpAndRegisterForPhoneNumber(
+                verificationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @PostMapping("/send-otp-to-mobile")
     public ResponseEntity<?> sendOtp(@Valid @RequestBody LoginRequest request) {
-        Otp otp = userAuthenticationService.sendOtpToPhoneNumber(request.getInput());
+        Otp otp = userAuthenticationService.sendOtpToPhoneNumber(request);
         OtpResponse otpResponse = modelMapper.map(otp,OtpResponse.class);
         return new ResponseEntity<>(otpResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/verify-otp-register-login")
-    public ResponseEntity<LoginResponse> verifyOtpAndRegisterForPhoneNumber(
-           @Valid @RequestBody VerificationRequest verificationRequest) {
-        LoginResponse response = userAuthenticationService.verifyOtpAndRegisterOrLoginForPhoneNumber(
+    @PostMapping("/verify-otp-login")
+    public ResponseEntity<LoginResponse> verifyOtpAndLoginForPhoneNumberOrEmail(
+            @Valid @RequestBody VerificationRequest verificationRequest) {
+        LoginResponse response = userAuthenticationService.verifyOtpAndLoginForEmailOrPhoneNumber(
                 verificationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -71,7 +79,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/patient-info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> patientInfo(
+    public ResponseEntity<ApiResponse> patientInfo(
             @RequestPart("patientImage") MultipartFile patientImage,
             @RequestPart("reportsImages") List<MultipartFile> reportsImages,
             @RequestPart("patientRequestDto") String patientRequestDtoStr,
@@ -129,12 +137,11 @@ public class UserController {
     }
 
     @PutMapping("/update-profile")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ApiResponse> updateUserProfile(
             @Valid @RequestBody EditProfileRequest editProfileRequest,
             @RequestHeader("Authorization") String authHeader
     ) {
-
         String response = userAuthenticationService.updateProfile(editProfileRequest,authHeader);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
     }
@@ -152,6 +159,13 @@ public class UserController {
     public ResponseEntity<BloodDonorDetails> getBloodDonorDetails(@RequestParam Long userId) {
         BloodDonorDetails donorDetails = userAuthenticationService.getBloodDonorDetails(userId);
         return ResponseEntity.status(HttpStatus.OK).body(donorDetails);
+    }
+
+    @PostMapping("/google-register")
+    public ResponseEntity<LoginResponse> registerWithGoogle(@RequestBody GoogleAuthRequest request) {
+        LoginResponse user = userAuthenticationService.checkUserAndRegisterWithOAuth(
+                request.getToken());
+        return ResponseEntity.ok(user);
     }
 
 }

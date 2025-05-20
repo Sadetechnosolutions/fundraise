@@ -1,6 +1,7 @@
 package com.sadetech.fundraiser.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class BloodDonor {
     private Long id;
     @Column(nullable = false)
     private Long userId;
+    @NotBlank(message = "Blood Group details can't be blank")
     private String bloodGroup;
     private String alternateMobileNumber;
     private String country;
@@ -23,6 +25,6 @@ public class BloodDonor {
     private String district;
     private String city;
     private String townOrVillage;
-    private String pincode;
+    private String pinCode;
 
 }

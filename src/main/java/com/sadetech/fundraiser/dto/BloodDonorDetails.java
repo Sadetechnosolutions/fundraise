@@ -16,6 +16,6 @@ public class BloodDonorDetails {
     private String district;
     private String city;
     private String townOrVillage;
-    private String pincode;
+    private String pinCode;
 
 }

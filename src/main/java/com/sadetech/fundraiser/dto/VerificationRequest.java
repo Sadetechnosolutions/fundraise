@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 public class VerificationRequest {
-    @NotBlank(message = "Phone number can't be blank")
-    private String phoneNumber;
+    @NotBlank(message = "Input can't be blank")
+    private String input;
     @NotBlank(message = "OTP can't be blank")
     private String otp;
 }
