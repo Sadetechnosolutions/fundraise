@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 @Service
 public class UserAuthenticationService {
@@ -66,7 +67,7 @@ public class UserAuthenticationService {
     public LoginResponse checkUserAndRegisterWithOAuth(String idToken) {
 
         if (idToken == null || idToken.isBlank()) {
-            throw new IllegalArgumentException("Id token should not be null");
+            throw new InvalidTokenException("Id token should not be null");
         }
 
         // Step 1: Verify Google ID Token and get email
@@ -121,7 +122,7 @@ public class UserAuthenticationService {
         if (existingOtp.isPresent()) {
             LocalDateTime otpCreatedAt = existingOtp.get().getCreatedAt();
             if (LocalDateTime.now().isBefore(otpCreatedAt.plusMinutes(1))) {
-                throw new IllegalArgumentException("An OTP was recently sent. Please wait before requesting another.");
+                throw new RequestTimeoutException("An OTP was recently sent. Please wait before requesting another.");
             }
         }
 
@@ -154,7 +155,7 @@ public class UserAuthenticationService {
 
             // Optional: Add email format validation
             if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
-                throw new IllegalArgumentException("Invalid email format.");
+                throw new InvalidInputException("Invalid email format.");
             }
 
             User user = userRepository.findByEmail(email)
@@ -165,7 +166,7 @@ public class UserAuthenticationService {
             if (existingOtp.isPresent()) {
                 LocalDateTime otpCreatedAt = existingOtp.get().getCreatedAt();
                 if (LocalDateTime.now().isBefore(otpCreatedAt.plusMinutes(1))) {
-                    throw new IllegalArgumentException("An OTP was recently sent. Please wait before requesting another.");
+                    throw new RequestTimeoutException("An OTP was recently sent. Please wait before requesting another.");
                 }
             }
 
@@ -198,7 +199,7 @@ public class UserAuthenticationService {
             if (existingOtp.isPresent()) {
                 LocalDateTime otpCreatedAt = existingOtp.get().getCreatedAt();
                 if (LocalDateTime.now().isBefore(otpCreatedAt.plusMinutes(1))) {
-                    throw new IllegalArgumentException("An OTP was recently sent. Please wait before requesting another.");
+                    throw new RequestTimeoutException("An OTP was recently sent. Please wait before requesting another.");
                 }
             }
 
@@ -263,7 +264,7 @@ public class UserAuthenticationService {
 
             // ✅ Check if the user already exists
             if (userRepository.findByPhoneNumber(phoneNumber).isPresent()) {
-                throw new IllegalArgumentException("Phone number already registered. Please log in.");
+                throw new PhoneNumberExistException("Phone number already registered. Please log in.");
             }
 
             // ✅ Create and save a new user
@@ -308,7 +309,7 @@ public class UserAuthenticationService {
             }
 
             if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
-                throw new IllegalArgumentException("Invalid email format.");
+                throw new InvalidInputException("Invalid email format.");
             }
 
             if (otpCode == null || otpCode.trim().isEmpty()) {
@@ -576,7 +577,7 @@ public class UserAuthenticationService {
         String fullName = editProfileRequest.getFullName();
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Invalid Authorization header format");
+            throw new InvalidTokenException("Invalid Authorization header format");
         }
 
         String token = authHeader.substring(7); // gets the token part
@@ -656,7 +657,7 @@ public class UserAuthenticationService {
 
         BloodDonor existingBloodDonor = bloodDonorRepository.findByUserId(userId);
         if(existingBloodDonor != null){
-            throw new IllegalArgumentException("Blood donor details already exist for this user.");
+            throw new ResourceAlreadyExistException("Blood donor details already exist for this user.");
         }
 
         bloodDonor.setUserId(userId);
@@ -746,6 +747,31 @@ public class UserAuthenticationService {
         }
 
         return responseList;
+    }
+
+    public PatientResponseDto getPatientDetailsById(Long id, HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Invalid Authorization header format");
+        }
+
+        String token = authHeader.substring(7);
+        List<String> roles = jwtUtils.extractRole(token);
+
+        boolean isAdmin = roles.contains("ROLE_ADMIN");
+        boolean isUser = roles.contains("ROLE_USER");
+
+        BasicInfo basicInfo = basicInfoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Basic info not found with id: " + id));
+
+        if (isUser && basicInfo.getStatus() == Status.APPROVED) {
+            return mapToResponseDto(basicInfo);
+        } else if (isAdmin){
+            return mapToResponseDto(basicInfo);
+        } else {
+            throw new UnAuthorizedAccessException("You are not authorized to view this information.");
+        }
     }
 
     private PatientResponseDto mapToResponseDto(BasicInfo entity) {

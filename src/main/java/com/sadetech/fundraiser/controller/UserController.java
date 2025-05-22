@@ -187,4 +187,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(patientResponseDtoList);
     }
 
+    @GetMapping("/get-detailed-information-of-fund-raiser/{id}")
+    public ResponseEntity<PatientResponseDto> getDetailedInformationOfFundRaiser(@PathVariable Long id, HttpServletRequest request) {
+        PatientResponseDto detailedInformationOfFundRaiserResponseDto = userAuthenticationService.getPatientDetailsById(id, request);
+        return ResponseEntity.status(HttpStatus.OK).body(detailedInformationOfFundRaiserResponseDto);
+    }
+
 }
