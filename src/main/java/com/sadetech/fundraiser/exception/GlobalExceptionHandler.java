@@ -40,12 +40,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnAuthorizedAccessException(UnAuthorizedAccessException ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 ex.getMessage(),
-                403,
+                401,
                 "UnAuthorizedAccessException",
                 request.getDescription(false),
                 LocalDateTime.now()
         );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
     @ExceptionHandler(InvalidPhoneNumberException.class)

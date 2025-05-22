@@ -1,5 +1,6 @@
 package com.sadetech.fundraiser.dto;
 
+import com.sadetech.fundraiser.model.Status;
 import lombok.Data;
 
 @Data
@@ -11,4 +12,5 @@ public class BasicInfoDto {
     private String relationWithPatient;
     private String patientAddress;
     private String contactDetails;
+    private Status status;
 }

@@ -1,13 +1,13 @@
-package com.sadetech.fundraiser.service;
+package com.sadetech.fundraiser.utility;
 
 import com.sadetech.fundraiser.exception.RedisConnectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
-@Service
+@Component
 public class RateLimiterService {
 
     @Autowired

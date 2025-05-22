@@ -1,8 +1,8 @@
-package com.sadetech.fundraiser.service;
+package com.sadetech.fundraiser.utility;
 
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Service
+@Component
 public class FileUploadService {
 
     @Value( "${upload.dir}")

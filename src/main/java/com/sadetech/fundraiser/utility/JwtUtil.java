@@ -13,7 +13,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -21,7 +23,6 @@ public class JwtUtil {
     private final SecretKey key ;
     private static final long EXPIRATION_TIME = 86_400_000;
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 604_800_000;
-
 
     public JwtUtil(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Base64.getDecoder().decode(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -75,4 +76,22 @@ public class JwtUtil {
         }
         return extractClaims(token, claims -> claims.get("userId")).toString();
     }
+
+    public List<String> extractRole(String token) {
+        if (isTokenExpired(token)) {
+            throw new InvalidTokenException("Token is expired.");
+        }
+
+        return extractClaims(token, claims -> {
+            Object roles = claims.get("role");
+            if (roles instanceof List<?>) {
+                return ((List<?>) roles).stream()
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+            } else {
+                return List.of(roles.toString()); // fallback if it's a single role as a string
+            }
+        });
+    }
+
 }

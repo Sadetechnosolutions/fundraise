@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sadetech.fundraiser.dto.*;
 import com.sadetech.fundraiser.model.BloodDonor;
 import com.sadetech.fundraiser.model.Otp;
+import com.sadetech.fundraiser.model.Status;
 import com.sadetech.fundraiser.model.User;
 import com.sadetech.fundraiser.service.UserAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,13 @@ public class UserController {
 
     @Value("${upload.dir}")
     private String uploadDir;
+
+    @PostMapping("/google-register")
+    public ResponseEntity<LoginResponse> registerWithGoogle(@RequestBody GoogleAuthRequest request) {
+        LoginResponse user = userAuthenticationService.checkUserAndRegisterWithOAuth(
+                request.getToken());
+        return ResponseEntity.ok(user);
+    }
 
     @PostMapping("/register-mobile")
     public ResponseEntity<?> registerWithMobileNumber(@Valid @RequestBody MobileRegisterRequest request) {
@@ -137,7 +145,6 @@ public class UserController {
     }
 
     @PutMapping("/update-profile")
-    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ApiResponse> updateUserProfile(
             @Valid @RequestBody EditProfileRequest editProfileRequest,
             @RequestHeader("Authorization") String authHeader
@@ -161,11 +168,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(donorDetails);
     }
 
-    @PostMapping("/google-register")
-    public ResponseEntity<LoginResponse> registerWithGoogle(@RequestBody GoogleAuthRequest request) {
-        LoginResponse user = userAuthenticationService.checkUserAndRegisterWithOAuth(
-                request.getToken());
-        return ResponseEntity.ok(user);
+    @PutMapping("/update-patient-details-status/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> updatePatientDetailsStatus(
+            @PathVariable Long id,
+            @RequestParam String status,
+            @RequestParam String message
+    ) {
+            Status enumStatus = Status.valueOf(status.trim().toUpperCase());
+            String response = userAuthenticationService.updatePatientInfoDetailsStatus(id, enumStatus, message);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
+    }
+
+    @GetMapping("/get-patient-details-status/{status}")
+    public ResponseEntity<List<PatientResponseDto>> getPatientDetailsStatus(@PathVariable String status, HttpServletRequest request) {
+        Status enumStatus = Status.valueOf(status.trim().toUpperCase());
+        List<PatientResponseDto> patientResponseDtoList = userAuthenticationService.getPatientDetailsByStatus(enumStatus,request);
+        return ResponseEntity.status(HttpStatus.OK).body(patientResponseDtoList);
     }
 
 }

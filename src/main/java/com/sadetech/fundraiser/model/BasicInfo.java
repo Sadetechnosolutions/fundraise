@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +24,12 @@ public class BasicInfo {
     private String relationWithPatient;
     private String patientAddress;
     private String contactDetails;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private String message;
     @CreationTimestamp
-    private String createdAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @OneToOne(mappedBy = "basicInfo", cascade = CascadeType.ALL)
     private Cause cause;

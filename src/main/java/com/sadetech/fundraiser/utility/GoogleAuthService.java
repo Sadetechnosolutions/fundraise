@@ -1,27 +1,19 @@
-package com.sadetech.fundraiser.service;
+package com.sadetech.fundraiser.utility;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
-@Service
+@Component
 public class GoogleAuthService {
 
-    @Value("${google.client.id}")
-    private String googleClientId;
-
-    public static String GOOGLE_CLIENT_ID;
-
-    @PostConstruct
-    public void init() {
-        GOOGLE_CLIENT_ID = googleClientId;
-    }
+    @Value("${google.client-id}")
+    private String GOOGLE_CLIENT_ID;
 
     public String verifyGoogleToken(String idToken) {
         try {
@@ -43,7 +35,7 @@ public class GoogleAuthService {
                 throw new IllegalArgumentException("Email not verified by Google");
             }
 
-            return payload.getEmail(); // ✅ Extract email from token
+            return payload.getEmail(); // ✅ Extract email from a token
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Google ID Token verification failed: " + e.getMessage());

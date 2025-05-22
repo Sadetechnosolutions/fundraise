@@ -1,5 +1,6 @@
 package com.sadetech.fundraiser.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,6 +11,11 @@ import java.util.Properties;
 @Configuration
 public class MailConfig {
 
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Value("${spring.mail.password}")
+    private String password;
 
         @Bean
         public JavaMailSender javaMailSender() {
@@ -17,8 +23,8 @@ public class MailConfig {
             mailSender.setHost("smtp.gmail.com");
             mailSender.setPort(587);
 
-            mailSender.setUsername("msgmanagementservice@gmail.com");
-            mailSender.setPassword("grircclbsfyilkcz");
+            mailSender.setUsername(username);
+            mailSender.setPassword("");
 
             Properties props = mailSender.getJavaMailProperties();
             props.put("mail.transport.protocol", "smtp");

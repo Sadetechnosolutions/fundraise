@@ -4,14 +4,12 @@ import com.sadetech.fundraiser.dto.*;
 import com.sadetech.fundraiser.exception.*;
 import com.sadetech.fundraiser.model.*;
 import com.sadetech.fundraiser.repository.*;
-import com.sadetech.fundraiser.utility.EmailService;
-import com.sadetech.fundraiser.utility.JwtUtil;
+import com.sadetech.fundraiser.utility.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -65,6 +63,43 @@ public class UserAuthenticationService {
     @Autowired
     private GoogleAuthService googleAuthService;
 
+    public LoginResponse checkUserAndRegisterWithOAuth(String idToken) {
+
+        if (idToken == null || idToken.isBlank()) {
+            throw new IllegalArgumentException("Id token should not be null");
+        }
+
+        // Step 1: Verify Google ID Token and get email
+        String email = googleAuthService.verifyGoogleToken(idToken);
+
+        // Step 2: Check if the user already exists
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User savedUser = optionalUser.get();
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setId(savedUser.getId());
+            loginResponse.setToken(jwtUtils.generateToken(savedUser));
+            loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
+            loginResponse.setMessage("Successfully Logged In");
+            return loginResponse;
+        }
+
+        // Step 4: Register a new user
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setRole(new HashSet<>(List.of("ROLE_USER")));
+
+        User savedUser = userRepository.save(newUser);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setId(savedUser.getId());
+        loginResponse.setToken(jwtUtils.generateToken(savedUser));
+        loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
+        loginResponse.setMessage("Successfully Registered & Logged In");
+
+        return loginResponse;
+    }
+
     public Otp registerWithMobileNumber(String phoneNumber) {
 
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
@@ -80,7 +115,6 @@ public class UserAuthenticationService {
         if (userRepository.findByPhoneNumber(phoneNumber).isPresent()) {
             throw new UserAlreadyExistException("Phone number already exists. Please log in.");
         }
-
 
         // ✅ OTP resend cooldown check
         Optional<Otp> existingOtp = otpRepository.findFirstByPhoneNumberAndUsedFalseAndOtpTypeOrderByCreatedAtDesc(phoneNumber,"Sign up");
@@ -227,7 +261,6 @@ public class UserAuthenticationService {
                 throw new InvalidOtpException("OTP has expired.");
             }
 
-
             // ✅ Check if the user already exists
             if (userRepository.findByPhoneNumber(phoneNumber).isPresent()) {
                 throw new IllegalArgumentException("Phone number already registered. Please log in.");
@@ -236,13 +269,12 @@ public class UserAuthenticationService {
             // ✅ Create and save a new user
             User newUser = new User();
             newUser.setPhoneNumber(phoneNumber);
-            newUser.setRole(new HashSet<>(List.of("USER")));
+            newUser.setRole(new HashSet<>(List.of("ROLE_USER")));
 
             User savedUser = userRepository.save(newUser);
 
             otpEntity.setUsed(true);
             otpRepository.save(otpEntity);
-
 
             // ✅ Generate JWT & refresh token
             String jwt = jwtUtils.generateToken(savedUser);
@@ -452,6 +484,8 @@ public class UserAuthenticationService {
         basicInfo.setPatientAddress(patientRequestDto.getBasicInfo().getPatientAddress());
         basicInfo.setContactDetails(patientRequestDto.getBasicInfo().getContactDetails());
         basicInfo.setPatientImage(uploadedPatientImageUrl);
+        basicInfo.setStatus(Status.PENDING);
+        basicInfo.setMessage("Processing patient info. Please wait for a response from the admin. Thank you for your patience.");
         basicInfoRepository.save(basicInfo);
 
         // Save Cause Info
@@ -497,7 +531,10 @@ public class UserAuthenticationService {
             dto.setRelationWithPatient(entity.getRelationWithPatient());
             dto.setPatientAddress(entity.getPatientAddress());
             dto.setContactDetails(entity.getContactDetails());
+            dto.setStatus(entity.getStatus());
+            dto.setMessage(entity.getMessage());
             dto.setCreatedAt(entity.getCreatedAt());
+            dto.setUpdatedAt(entity.getUpdatedAt());
             patientResponseDto.setBasicInfo(dto);
 
             Cause cause = entity.getCause();
@@ -627,6 +664,7 @@ public class UserAuthenticationService {
         return "Blood donor details saved successfully!";
     }
 
+    @Transactional
     public BloodDonorDetails getBloodDonorDetails(Long userId) {
 
         BloodDonorDetails bloodDonorDetails = new BloodDonorDetails();
@@ -655,41 +693,101 @@ public class UserAuthenticationService {
         return bloodDonorDetails;
     }
 
-    public LoginResponse checkUserAndRegisterWithOAuth(String idToken) {
+    public String updatePatientInfoDetailsStatus(Long id, Status status, String message) {
+        BasicInfo basicInfo = basicInfoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Basic info not found with id: " + id));
 
-        if (idToken == null || idToken.isBlank()) {
-            throw new IllegalArgumentException("Id token should not be null");
+        // Compare enum directly with enum
+        if (basicInfo.getStatus() == Status.APPROVED || basicInfo.getStatus() == Status.REJECTED) {
+            throw new IllegalArgumentException("Patient info status already updated.");
         }
 
-        // Step 1: Verify Google ID Token and get email
-        String email = googleAuthService.verifyGoogleToken(idToken);
-
-        // Step 2: Check if the user already exists
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            User savedUser = optionalUser.get();
-            LoginResponse loginResponse = new LoginResponse();
-            loginResponse.setId(savedUser.getId());
-            loginResponse.setToken(jwtUtils.generateToken(savedUser));
-            loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
-            loginResponse.setMessage("Successfully Logged In");
-            return loginResponse;
+        if (basicInfo.getStatus() == Status.PENDING) {
+            basicInfo.setStatus(status);
+            basicInfo.setMessage(message);
+            basicInfo.setUpdatedAt(LocalDateTime.now());
+            basicInfoRepository.save(basicInfo);
+            return "Patient info updated successfully!";
         }
 
-        // Step 4: Register a new user
-        User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setRole(new HashSet<>(List.of("USER")));
+        throw new IllegalStateException("Invalid status state");
+    }
 
-        User savedUser = userRepository.save(newUser);
+    @Transactional
+    public List<PatientResponseDto> getPatientDetailsByStatus(Status status, HttpServletRequest request) {
+        List<BasicInfo> entities = basicInfoRepository.findByStatus(status);
+        if (entities.isEmpty()) {
+            throw new ResourceNotFoundException("No details found for status: " + status);
+        }
 
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setId(savedUser.getId());
-        loginResponse.setToken(jwtUtils.generateToken(savedUser));
-        loginResponse.setRefreshToken(jwtUtils.generateRefreshToken(savedUser));
-        loginResponse.setMessage("Successfully Registered & Logged In");
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Invalid Authorization header format");
+        }
 
-        return loginResponse;
+        String token = authHeader.substring(7);
+        List<String> roles = jwtUtils.extractRole(token);
+
+        List<PatientResponseDto> responseList = new ArrayList<>();
+
+        for (BasicInfo entity : entities) {
+            boolean isAdmin = roles.contains("ROLE_ADMIN");
+            boolean isUser = roles.contains("ROLE_USER");
+
+            // Access logic:
+            if (isUser && status == Status.APPROVED) {
+                responseList.add(mapToResponseDto(entity));
+            } else if (isAdmin) {
+                responseList.add(mapToResponseDto(entity));
+
+            } else {
+                throw new UnAuthorizedAccessException("You are not authorized to view this information.");
+            }
+        }
+
+        return responseList;
+    }
+
+    private PatientResponseDto mapToResponseDto(BasicInfo entity) {
+        PatientResponseDto patientResponseDto = new PatientResponseDto();
+
+        BasicInfoDto1 dto = new BasicInfoDto1();
+        dto.setId(entity.getId());
+        dto.setUserId(entity.getUserId());
+        dto.setPatientImage(entity.getPatientImage());
+        dto.setPatientAge(entity.getPatientAge());
+        dto.setPatientName(entity.getPatientName());
+        dto.setRelationWithPatient(entity.getRelationWithPatient());
+        dto.setPatientAddress(entity.getPatientAddress());
+        dto.setContactDetails(entity.getContactDetails());
+        dto.setStatus(entity.getStatus());
+        dto.setMessage(entity.getMessage());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        patientResponseDto.setBasicInfo(dto);
+
+        Cause cause = entity.getCause();
+        if (cause != null) {
+            CauseDto causeDto = new CauseDto();
+            causeDto.setCause(cause.getCause());
+            causeDto.setAmount(cause.getAmount());
+            causeDto.setHospitalName(cause.getHospitalName());
+            causeDto.setHospitalAddress(cause.getHospitalAddress());
+            causeDto.setHospitalContactDetails(cause.getHospitalContactDetails());
+            causeDto.setMedication(cause.getMedication());
+            patientResponseDto.setCause(causeDto);
+        }
+
+        MedicalDescription description = entity.getDescription();
+        if (description != null) {
+            DescriptionDto descDto = new DescriptionDto();
+            descDto.setDescriptionHeading(description.getDescriptionHeading());
+            descDto.setMedicalHistoryAndDetails(description.getMedicalHistoryAndDetails());
+            descDto.setReportsImages(description.getReportsImages());
+            patientResponseDto.setDescription(descDto);
+        }
+
+        return patientResponseDto;
     }
 
 }   // End of UserAuthenticationService class

@@ -1,6 +1,9 @@
 package com.sadetech.fundraiser.dto;
 
+import com.sadetech.fundraiser.model.Status;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class BasicInfoDto1 {
@@ -12,7 +15,8 @@ public class BasicInfoDto1 {
     private String relationWithPatient;
     private String patientAddress;
     private String contactDetails;
-    private String createdAt;
-    private CauseDto cause;
-    private DescriptionDto description;
+    private Status status;
+    private String message;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
