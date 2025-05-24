@@ -3,6 +3,7 @@ package com.sadetech.fundraiser;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 public class FundraiserApplication {
@@ -13,6 +14,7 @@ public class FundraiserApplication {
 		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 
 		SpringApplication.run(FundraiserApplication.class, args);
+
 	}
 
 }

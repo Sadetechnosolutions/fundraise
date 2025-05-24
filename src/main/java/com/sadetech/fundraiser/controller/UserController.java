@@ -3,6 +3,7 @@ package com.sadetech.fundraiser.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sadetech.fundraiser.dto.*;
+import com.sadetech.fundraiser.exception.FileUploadException;
 import com.sadetech.fundraiser.model.BloodDonor;
 import com.sadetech.fundraiser.model.Otp;
 import com.sadetech.fundraiser.model.Status;
@@ -10,7 +11,7 @@ import com.sadetech.fundraiser.model.User;
 import com.sadetech.fundraiser.service.UserAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
+//import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -91,7 +92,7 @@ public class UserController {
             @RequestPart("patientImage") MultipartFile patientImage,
             @RequestPart("reportsImages") List<MultipartFile> reportsImages,
             @RequestPart("patientRequestDto") String patientRequestDtoStr,
-            HttpServletRequest request) throws FileUploadException, JsonProcessingException, FileNotFoundException {
+            HttpServletRequest request) throws FileUploadException, JsonProcessingException, FileNotFoundException, org.apache.tomcat.util.http.fileupload.FileUploadException {
 
             ObjectMapper objectMapper = new ObjectMapper();
             PatientRequestDto patientRequestDto = objectMapper.readValue(patientRequestDtoStr, PatientRequestDto.class);
@@ -155,16 +156,15 @@ public class UserController {
 
     @PostMapping("/add-donor-details")
     public ResponseEntity<ApiResponse> addDonorDetails(
-            @Valid @RequestBody BloodDonor donorDetailsRequest,
-            HttpServletRequest request
+            @Valid @RequestBody BloodDonorDetails donorDetailsRequest
     ) {
-        String response = userAuthenticationService.addBloodDonorDetails(donorDetailsRequest, request);
+        String response = userAuthenticationService.addBloodDonorDetails(donorDetailsRequest);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
     }
 
     @GetMapping("/donor-details")
-    public ResponseEntity<BloodDonorDetails> getBloodDonorDetails(@RequestParam Long userId) {
-        BloodDonorDetails donorDetails = userAuthenticationService.getBloodDonorDetails(userId);
+    public ResponseEntity<BloodDonor> getBloodDonorDetails(@RequestParam String phoneNumber) {
+        BloodDonor donorDetails = userAuthenticationService.getBloodDonorDetails(phoneNumber);
         return ResponseEntity.status(HttpStatus.OK).body(donorDetails);
     }
 
@@ -191,6 +191,18 @@ public class UserController {
     public ResponseEntity<PatientResponseDto> getDetailedInformationOfFundRaiser(@PathVariable Long id, HttpServletRequest request) {
         PatientResponseDto detailedInformationOfFundRaiserResponseDto = userAuthenticationService.getPatientDetailsById(id, request);
         return ResponseEntity.status(HttpStatus.OK).body(detailedInformationOfFundRaiserResponseDto);
+    }
+
+    @GetMapping("/get-all-donor-details")
+    public ResponseEntity<List<BloodDonor>> getAllBloodDonorDetails() {
+        List<BloodDonor> bloodDonorList = userAuthenticationService.getAllBloodDonorDetails();
+        return ResponseEntity.status(HttpStatus.OK).body(bloodDonorList);
+    }
+
+    @GetMapping("/get-donor-details-by-id/{id}")
+    public ResponseEntity<BloodDonor> getParticularBloodDonorDetails(@PathVariable Long id) {
+        BloodDonor bloodDonor = userAuthenticationService.getBloodDonorDetailsById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(bloodDonor);
     }
 
 }

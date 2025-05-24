@@ -15,9 +15,10 @@ public class BloodDonor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
     private Long userId;
-    @NotBlank(message = "Blood Group details can't be blank")
+    private String fullName;
+    private String phoneNumber;
+    private String email;
     private String bloodGroup;
     private String alternateMobileNumber;
     private String country;

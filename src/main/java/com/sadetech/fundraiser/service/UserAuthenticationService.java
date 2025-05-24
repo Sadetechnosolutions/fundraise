@@ -281,7 +281,6 @@ public class UserAuthenticationService {
             String refreshToken = jwtUtils.generateRefreshToken(savedUser);
 
             // ✅ Prepare response
-
             response.setId(savedUser.getId());
             response.setToken(jwt);
             response.setRefreshToken(refreshToken);
@@ -643,54 +642,68 @@ public class UserAuthenticationService {
         }
     }
 
-    public String addBloodDonorDetails(BloodDonor bloodDonor, HttpServletRequest request) {
-        long userId = Long.parseLong((String) request.getAttribute("userId"));
+    public String addBloodDonorDetails(BloodDonorDetails bloodDonorDetails) {
 
-        if(request.getAttribute("userId") == null){
-            throw new ResourceNotFoundException("User not found with id: " + userId);
+        BloodDonor bloodDonor = new BloodDonor();
+
+        if (bloodDonorDetails.getPhoneNumber() == null || bloodDonorDetails.getPhoneNumber().trim().isEmpty()) {
+            throw new InvalidPhoneNumberException("Phone number is required.");
         }
 
-        if(userId != bloodDonor.getUserId()){
-            throw new UnAuthorizedAccessException("You are not authorized to perform this action.");
+        if (!bloodDonorDetails.getPhoneNumber().matches("^[6-9]\\d{9}$")) {
+            throw new InvalidPhoneNumberException("Invalid phone number format.");
         }
 
-        BloodDonor existingBloodDonor = bloodDonorRepository.findByUserId(userId);
-        if(existingBloodDonor != null){
-            throw new ResourceAlreadyExistException("Blood donor details already exist for this user.");
+        Optional<BloodDonor> bloodDonor1 = bloodDonorRepository.findByPhoneNumber(bloodDonorDetails.getPhoneNumber());
+
+        if (bloodDonor1.isPresent()) {
+            throw new ResourceAlreadyExistException("Blood donor already exists for this phone number: " + bloodDonorDetails.getPhoneNumber() + ". Please use the update blood donor details endpoint to update existing blood donor details.");
         }
 
-        bloodDonor.setUserId(userId);
+        bloodDonor.setUserId(bloodDonorDetails.getUserId());
+        bloodDonor.setFullName(bloodDonorDetails.getFullName());
+        bloodDonor.setPhoneNumber(bloodDonorDetails.getPhoneNumber());
+        bloodDonor.setEmail(bloodDonorDetails.getEmail());
+        bloodDonor.setBloodGroup(bloodDonorDetails.getBloodGroup());
+        bloodDonor.setAlternateMobileNumber(bloodDonorDetails.getAlternateMobileNumber());
+        bloodDonor.setCountry(bloodDonorDetails.getCountry());
+        bloodDonor.setState(bloodDonorDetails.getState());
+        bloodDonor.setDistrict(bloodDonorDetails.getDistrict());
+        bloodDonor.setCity(bloodDonorDetails.getCity());
+        bloodDonor.setTownOrVillage(bloodDonorDetails.getTownOrVillage());
+        bloodDonor.setPinCode(bloodDonorDetails.getPinCode());
+
         bloodDonorRepository.save(bloodDonor);
         return "Blood donor details saved successfully!";
     }
 
-    @Transactional
-    public BloodDonorDetails getBloodDonorDetails(Long userId) {
+    public BloodDonor getBloodDonorDetails(String phoneNumber) {
 
-        BloodDonorDetails bloodDonorDetails = new BloodDonorDetails();
-
-        BloodDonor bloodDonor = bloodDonorRepository.findByUserId(userId);
-        if(bloodDonor == null){
-            throw new ResourceNotFoundException("Blood donor details not found for this user.");
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            throw new InvalidPhoneNumberException("Phone number is required.");
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        if (!phoneNumber.matches("^[6-9]\\d{9}$")) {
+            throw new InvalidPhoneNumberException("Invalid phone number format.");
+        }
 
-        bloodDonorDetails.setUserId(user.getId());
-        bloodDonorDetails.setFullName(user.getFullName());
-        bloodDonorDetails.setPhoneNumber(user.getPhoneNumber());
-        bloodDonorDetails.setEmail(user.getEmail());
-        bloodDonorDetails.setBloodGroup(bloodDonor.getBloodGroup());
-        bloodDonorDetails.setAlternateMobileNumber(bloodDonor.getAlternateMobileNumber());
-        bloodDonorDetails.setCountry(bloodDonor.getCountry());
-        bloodDonorDetails.setState(bloodDonor.getState());
-        bloodDonorDetails.setDistrict(bloodDonor.getDistrict());
-        bloodDonorDetails.setCity(bloodDonor.getCity());
-        bloodDonorDetails.setTownOrVillage(bloodDonor.getTownOrVillage());
-        bloodDonorDetails.setPinCode(bloodDonor.getPinCode());
+        return bloodDonorRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Blood donor not found for this user."));
+    }
 
-        return bloodDonorDetails;
+    public BloodDonor getBloodDonorDetailsById(Long id) {
+        return bloodDonorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Blood donor not found with id: " + id));
+    }
+
+    public List<BloodDonor> getAllBloodDonorDetails(){
+
+        List<BloodDonor> bloodDonors = bloodDonorRepository.findAll();
+        if (bloodDonors.isEmpty()) {
+            throw new ResourceNotFoundException("Blood donors list is empty.");
+        }
+
+        return bloodDonors;
     }
 
     public String updatePatientInfoDetailsStatus(Long id, Status status, String message) {
@@ -763,6 +776,7 @@ public class UserAuthenticationService {
 
         BasicInfo basicInfo = basicInfoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Basic info not found with id: " + id));
+
 
         if (isUser && basicInfo.getStatus() == Status.APPROVED) {
             return mapToResponseDto(basicInfo);
