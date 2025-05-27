@@ -11,7 +11,6 @@ import com.sadetech.fundraiser.model.User;
 import com.sadetech.fundraiser.service.UserAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-//import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -209,6 +208,12 @@ public class UserController {
     public ResponseEntity<ApiResponse> sendMessage(@RequestBody ContactRequest contactRequest) {
        userAuthenticationService.sendEmailToOrganization(contactRequest);
        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Email sent successfully"));
+    }
+
+    @PatchMapping("/update-role")
+    public ResponseEntity<ApiResponse> updateRole(@RequestParam Long userId){
+        String response = userAuthenticationService.updateRole(userId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
     }
 
 }

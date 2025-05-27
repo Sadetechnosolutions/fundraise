@@ -771,6 +771,8 @@ public class UserAuthenticationService {
         String token = authHeader.substring(7);
         List<String> roles = jwtUtils.extractRole(token);
 
+        Long userId = Long.valueOf(jwtUtils.extractUserId(token));
+
         boolean isAdmin = roles.contains("ROLE_ADMIN");
         boolean isUser = roles.contains("ROLE_USER");
 
@@ -778,9 +780,11 @@ public class UserAuthenticationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Basic info not found with id: " + id));
 
 
-        if (isUser && basicInfo.getStatus() == Status.APPROVED) {
+        if (isAdmin) {
             return mapToResponseDto(basicInfo);
-        } else if (isAdmin){
+        } else if (basicInfo.getUserId().equals(userId)) {
+            return mapToResponseDto(basicInfo);
+        } else if (isUser && basicInfo.getStatus() == Status.APPROVED){
             return mapToResponseDto(basicInfo);
         } else {
             throw new UnAuthorizedAccessException("You are not authorized to view this information.");
@@ -831,6 +835,19 @@ public class UserAuthenticationService {
 
     public void sendEmailToOrganization(ContactRequest contactRequest) {
         emailService.sendMailToOrganization(contactRequest);
+    }
+
+    public String updateRole(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->new ResourceNotFoundException("User not found"));
+
+        Set<String> roles = user.getRole();
+        for (String role : roles){
+            roles.add("ROLE_" + role);
+        }
+
+        user.setRole(roles);
+        return "Roles updated successfully";
     }
 
 }   // End of UserAuthenticationService class
