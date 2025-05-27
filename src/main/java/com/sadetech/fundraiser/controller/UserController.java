@@ -205,4 +205,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(bloodDonor);
     }
 
+    @PostMapping("/send-email-to-organization")
+    public ResponseEntity<ApiResponse> sendMessage(@RequestBody ContactRequest contactRequest) {
+       userAuthenticationService.sendEmailToOrganization(contactRequest);
+       return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Email sent successfully"));
+    }
+
 }

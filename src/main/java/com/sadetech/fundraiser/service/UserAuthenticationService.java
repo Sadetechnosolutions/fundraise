@@ -829,4 +829,8 @@ public class UserAuthenticationService {
         return patientResponseDto;
     }
 
+    public void sendEmailToOrganization(ContactRequest contactRequest) {
+        emailService.sendMailToOrganization(contactRequest);
+    }
+
 }   // End of UserAuthenticationService class

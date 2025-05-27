@@ -15,6 +15,7 @@ public class BloodDonor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = true)
     private Long userId;
     private String fullName;
     private String phoneNumber;
