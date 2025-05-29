@@ -752,7 +752,44 @@ public class UserAuthenticationService {
                 responseList.add(mapToResponseDto(entity));
             } else if (isAdmin) {
                 responseList.add(mapToResponseDto(entity));
+            } else {
+                throw new UnAuthorizedAccessException("You are not authorized to view this information.");
+            }
+        }
 
+        return responseList;
+    }
+
+    @Transactional
+    public List<PatientResponseDto> getPatientDetailsByStatusAndCause(String cause, HttpServletRequest request) {
+        List<BasicInfo> entities = basicInfoRepository.findAll();
+        if (entities.isEmpty()) {
+            throw new ResourceNotFoundException("No details found.");
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Invalid Authorization header format");
+        }
+
+        String token = authHeader.substring(7);
+        List<String> roles = jwtUtils.extractRole(token);
+
+        List<PatientResponseDto> responseList = new ArrayList<>();
+
+        for (BasicInfo entity : entities) {
+            boolean isAdmin = roles.contains("ROLE_ADMIN");
+            boolean isUser = roles.contains("ROLE_USER");
+
+            // Access logic:
+            if (isUser && entity.getStatus() == Status.APPROVED) {
+                if (Objects.equals(cause, entity.getCause().getCause())){
+                    responseList.add(mapToResponseDto(entity));
+                }
+            } else if (isAdmin) {
+                if (Objects.equals(cause, entity.getCause().getCause())){
+                    responseList.add(mapToResponseDto(entity));
+                }
             } else {
                 throw new UnAuthorizedAccessException("You are not authorized to view this information.");
             }
@@ -837,16 +874,20 @@ public class UserAuthenticationService {
         emailService.sendMailToOrganization(contactRequest);
     }
 
-    public String updateRole(Long userId){
+    public String updateRole(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Set<String> roles = user.getRole();
-        for (String role : roles){
-            roles.add("ROLE_" + role);
+        Set<String> currentRoles = user.getRole();
+        Set<String> updatedRoles = new HashSet<>();
+
+        for (String role : currentRoles) {
+            updatedRoles.add("ROLE_" + role);
         }
 
-        user.setRole(roles);
+        user.setRole(updatedRoles);
+        userRepository.save(user); // Save the updated user back to the database
+
         return "Roles updated successfully";
     }
 
