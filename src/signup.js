@@ -199,7 +199,7 @@ const userdata = {
     <span className="text-white text-sm medium:text-base font-[600]">Signup</span>
 </button>
 <span>or</span>
-            <GoogleOAuthProvider clientId="20674305043-s7vcprhkf5pks7mp3t99qd46qgvo73vq.apps.googleusercontent.com">
+            <GoogleOAuthProvider clientId="542846352949-8tsqnrktqbfe9e5qnke9uvs6v6641vse.apps.googleusercontent.com">
       <div className="w-5/6">
         <GoogleLogin
           onSuccess={credentialResponse => {
