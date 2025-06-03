@@ -40,7 +40,7 @@ const formsubmission = async (e) => {
   };
 
   try {
-    const response = await fetch(`http://localhost:9090/api/fund-raiser/add-donor-details`, {
+    const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/add-donor-details`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -80,7 +80,7 @@ const tabs = ["About", "Update", "Documents"];
           console.error('No token found in localStorage');
           return;
         }
-        const response = await fetch(`http://localhost:9090/api/fund-raiser/get-detailed-information-of-fund-raiser/${id}`, {
+        const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/get-detailed-information-of-fund-raiser/${id}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -168,7 +168,7 @@ const fundraiser = fund;
   {fundraiser.description?.reportsImages?.map((img, index) => (
     <img
       key={index}
-      src={`http://localhost:9090/api/fund-raiser${img}`}
+      src={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${img}`}
       alt={`Report ${index + 1}`}
       className="w-48 h-auto border rounded"
     />

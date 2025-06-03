@@ -22,7 +22,7 @@ const Signup = ()=>{
           phoneNumber:phonenumber,
         }
         try{
-          const response = await fetch(`http://192.168.1.29:9090/api/fund-raiser/register-mobile`,{
+          const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/register-mobile`,{
             method:'POST',
               headers: {
     "Content-Type": "application/json", // <-- this is required
@@ -93,7 +93,7 @@ const userdata = {
 }
     try {
 
-      const response = await fetch(`http://192.168.1.29:9090/api/fund-raiser/verify-otp-register`, {
+      const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/verify-otp-register`, {
         method: 'POST',
           headers: {
     "Content-Type": "application/json", // <-- this is required
@@ -195,7 +195,7 @@ const userdata = {
           onSuccess={credentialResponse => {
             const jwt = credentialResponse.credential;
             // Send this to your Spring Boot backend
-            fetch("http://localhost:9090/api/fund-raiser/google-register", {
+            fetch("https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/google-register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ token: jwt })

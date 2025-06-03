@@ -8,13 +8,13 @@ import Signin from './signin';
 import BasicDetails from './createFund1';
 import MedicalDetails from './createFund2';
 import BloodDonation from './blooddonation';
-import Blooddonors from './blooddonors';
+
 import Contactus from './contactus';
 import Donate from './donate';
 import FundraiserInfo from './fundraisinginfo';
 import MyFundraisers from './myfundraisers';
 import Errorpage from './errorpage';
-import Navbar from './navbar';
+
 import Request from './requests';
 import Requestdetails from './requestdetails';
 import Adminlogin from './adminlogin';
@@ -46,15 +46,6 @@ function App() {
   );
 }
 
-const DefaultWithNavbar = ({ children }) => {
-  return (
-    <>
-      <Navbar />
-      {children}
-    </>
-  )
-  ;
-}
 
 
 export default App;

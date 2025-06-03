@@ -27,7 +27,7 @@ const Navbar = () => {
     { id: 1, title: "Home", path: "/" },
     { id: 2, title: "Donate", path: "/donate" },
     { id: 3, title: "My Fundraisers", path: "/myfundraisers" },
-    { id: 4, title: "Pricing", path: "/pricing" },
+    { id: 4, title: "About us", path: "/aboutus" },
     { id: 5, title: "Contact us", path: "/contactus" },
   ];
 

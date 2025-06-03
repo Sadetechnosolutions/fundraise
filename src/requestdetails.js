@@ -13,7 +13,7 @@ const Requestdetails = ()=>{
             console.error('No token found in localStorage');
             return;
           }
-          const response = await fetch(`http://localhost:9090/api/fund-raiser/get-detailed-information-of-fund-raiser/${id}`, {
+          const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/get-detailed-information-of-fund-raiser/${id}`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -40,7 +40,7 @@ const Requestdetails = ()=>{
             console.error('No token found in localStorage');
             return;
           }
-          const response = await fetch(`http://localhost:9090/api/fund-raiser/update-patient-details-status/${id}?status=${status}&message=YOURREQUEST`, {
+          const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/update-patient-details-status/${id}?status=${status}&message=YOURREQUEST`, {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -71,8 +71,8 @@ const Requestdetails = ()=>{
 
       <div className="flex items-center justify-center gap-6">
         <img
-          src={`http://localhost:9090/api/fund-raiser${funds?.basicInfo.patientImage}`}
-          alt={`http://localhost:9090/api/fund-raiser${funds?.basicInfo.patientImage}`}
+          src={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${funds?.basicInfo.patientImage}`}
+          alt={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${funds?.basicInfo.patientImage}`}
           className="w-32 h-32 object-cover rounded-full border"
         />
 
@@ -109,8 +109,8 @@ const Requestdetails = ()=>{
           {funds?.description.reportsImages.map((img, idx) => (
             <img
               key={idx}
-              src={`http://localhost:9090/api/fund-raiser${img}`}
-              alt={`http://localhost:9090/api/fund-raiser${img}`}
+              src={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${img}`}
+              alt={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${img}`}
               className="w-full h-40 object-cover rounded-lg border"
             />
           ))}

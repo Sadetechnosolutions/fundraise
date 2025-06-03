@@ -17,7 +17,7 @@ const FundraisingList = ()=>{
             console.error('No token found in localStorage');
             return;
           }
-          const response = await fetch(`http://localhost:9090/api/fund-raiser/get-patient-details-status/APPROVED`, {
+          const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/get-patient-details-status/APPROVED`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -204,7 +204,7 @@ useEffect(() => {
   </div>
 
   <div className="flex-wrap w-auto flex sl:justify-center gap-x-10 gap-y-6 ">
-{fundDetails.map((fund)=>(<div className="w-full small:w-[46%] medium:w-1/4 cursor-pointer h-[22rem] medium:h-[27rem] rounded-lg border-gray-200 border-2">
+{fundDetails.map((fund)=>(<div className="w-full small:w-[46%] medium:w-1/4 cursor-pointer  rounded-lg border-gray-200 border-2">
   <NavLink to={`/fundraisers/${fund.id}/${fund.fundraiser}`}>
 <div className="relative">
     <div className="absolute top-1 left-0 p-1 w-24 bg-background rounded-br-full rounded-tr-full">
@@ -213,7 +213,7 @@ useEffect(() => {
 <img className="w-full h-44 small:h-40 medium:h-40 sl:h-44 med:h-44 xl:h-48 rounded-tr-md rounded-tl-md" src="bg.png" />
 <div className="flex flex-col gap-2 p-3">
 <p className="text-base  font-[600]">{fund.heading}</p>
-<span className="line-clamp-2 hidden medium:flex text-sm">{fund.description}</span>
+<span className="line-clamp-2 hidden sl:flex text-sm">{fund.description}</span>
 <div className="flex items-center justify-between">
 <span className="text-background text-sm sl:text-base font-[600]"> {fund.amount}</span>
 <div className="flex items-center">
@@ -225,7 +225,7 @@ useEffect(() => {
 </div>
 </div>
 <BasicProgressBar progress={fund.percentage} />
-<span className="font-[500] text-sm medium:text-base py-5">| Fundraised by {fund.fundraiser}</span>
+<span className="font-[500] text-sm medium:text-base mt-5">| Fundraised by {fund.fundraiser}</span>
 </div>
 
 </div></NavLink>

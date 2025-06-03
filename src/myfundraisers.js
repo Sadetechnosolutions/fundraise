@@ -16,7 +16,7 @@ const MyFundraisers = ()=>{
         console.error('No token found in localStorage');
         return;
       }
-      const response = await fetch(`http://localhost:9090/api/fund-raiser/patient-info?userId=${userId}`, {
+      const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/patient-info?userId=${userId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -71,7 +71,7 @@ const MyFundraisers = ()=>{
 
        
             <div className="flex flex-col">
-            <img className="medium:w-36 medium:h-36 h-48 rounded-md" src={`http://localhost:9090/api/fund-raiser${funds.basicInfo.patientImage}`} alt={`http://localhost:9090/api/fundraiser${funds.basicInfo.patientImage}`} />
+            <img className="medium:w-36 medium:h-36 h-48 rounded-md" src={`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser${funds.basicInfo.patientImage}`} alt={`https://api-fundraiser.sadetechnosolutions.com/api/fundraiser${funds.basicInfo.patientImage}`} />
             </div>
                         <div className="flex flex-col w-full">
                              <span className="text-lg medium:text-xl text-background font-[600]">{funds.description.descriptionHeading}</span>

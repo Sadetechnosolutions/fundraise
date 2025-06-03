@@ -77,7 +77,7 @@ images.forEach((img) => {
         const token = localStorage.getItem('token');
         try {
             // Send the request with the 'multipart/form-data' content type
-            const response = await fetch(`http://localhost:9090/api/fund-raiser/patient-info`, {
+            const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/patient-info`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
