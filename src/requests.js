@@ -7,7 +7,7 @@ const Request = ()=>{
 
     try {
       const token = localStorage.getItem('token');
-         const userId = localStorage.getItem('UserId');
+        //  const userId = localStorage.getItem('UserId');
       if (!token) {
         console.error('No token found in localStorage');
         return;
@@ -31,7 +31,7 @@ const Request = ()=>{
 
   useEffect(()=>{
     fetchRequest();
-  },[])
+  },[fetchRequest])
 
     return(
     <div className="w-full flex flex-col items-center justify-center">

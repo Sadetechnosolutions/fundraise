@@ -1,4 +1,4 @@
-import react from "react";  
+
 import Navbar from "./navbar";
 import Section from "./section";
 import FundraisingList from "./fundraisinglist";
@@ -43,7 +43,7 @@ const Home = ()=>{
     <FundraisingList />
     
     <div className="flex flex-col medium:flex-row w-full items-center medium:p-16 px-6 gap-8 medium:gap-40">
-        <img className="medium:h-[30rem] rounded-lg" src="volunteer.jpg" />
+        <img className="medium:h-[30rem] rounded-lg" src="volunteer.jpg" alt=""/>
 <div className="medium:w-1/3 flex flex-col gap-4">
   <span className="medium:text-4xl text-2xl font-[700] leading-snug">
     Join Hands to make sure that humanity still thrives in unity.

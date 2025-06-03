@@ -1,9 +1,9 @@
 import React, { useEffect,useCallback, useState } from "react";
 import Navbar from "./navbar";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const MyFundraisers = ()=>{
-    const Navigate = useNavigate()
+    // const Navigate = useNavigate()
         const [fund,setFunds] = useState()
 
     const fetchFundraisers = useCallback(async () => {
@@ -35,7 +35,7 @@ const MyFundraisers = ()=>{
 
   useEffect(()=>{
     fetchFundraisers();
-  },[])
+  },[fetchFundraisers])
 
         const BasicProgressBar = ({ progress }) => {
         return (

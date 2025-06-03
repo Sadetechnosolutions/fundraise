@@ -1,72 +1,72 @@
-import React,{useState,useEffect,useCallback} from "react";
+import {useState,useEffect,useCallback} from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./navbar";
 import Footer from "./footer";
 import { Icon } from "@iconify/react/dist/iconify.js";
 
 const FundraiserInfo = ()=>{
-      const { id, name } = useParams();
-            const fundDetails = [{
-        id:1,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Sharan',
-        percentage:40
-      },
-      {
-        id:2,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Anitha',
-        percentage:21
-      },
-      {
-        id:3,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Vikash',
-        percentage:68
-      },
-      {
-        id:4,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Tharun',
-        percentage:7
-      },
-      {
-        id:5,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Megha',
-        percentage:27
-      },
-      {
-        id:6,
-        topic:'topic',
-        heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
-        description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
-        amount:'Raised 1,90,000',
-        supporters:'43 supporters',
-        fundraiser:'Sharan',
-        percentage:94
-      },
-]
+      const { id } = useParams();
+//             const fundDetails = [{
+//         id:1,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Sharan',
+//         percentage:40
+//       },
+//       {
+//         id:2,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Anitha',
+//         percentage:21
+//       },
+//       {
+//         id:3,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Vikash',
+//         percentage:68
+//       },
+//       {
+//         id:4,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Tharun',
+//         percentage:7
+//       },
+//       {
+//         id:5,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Megha',
+//         percentage:27
+//       },
+//       {
+//         id:6,
+//         topic:'topic',
+//         heading:'Help Mozhivalan fight Leukemia, needs Bone Marrow Transplant',
+//         description:'Hello, my name is Namrata and this fund raiser has been created to support my son and',
+//         amount:'Raised 1,90,000',
+//         supporters:'43 supporters',
+//         fundraiser:'Sharan',
+//         percentage:94
+//       },
+// ]
 
 const tabs = ["About", "Update", "Documents"];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -75,7 +75,7 @@ const tabs = ["About", "Update", "Documents"];
       const fetchFundraisers = useCallback(async () => {
       try {
         const token = localStorage.getItem('token');
-           const userId = localStorage.getItem('UserId');
+          //  const userId = localStorage.getItem('UserId');
         if (!token) {
           console.error('No token found in localStorage');
           return;
@@ -95,11 +95,11 @@ const tabs = ["About", "Update", "Documents"];
       } catch (error) {
         console.error('Error fetching user Image:', error);
       }
-    },[]);
+    },[id]);
   
     useEffect(()=>{
       fetchFundraisers();
-    },[])
+    },[ fetchFundraisers])
 
 
 const fundraiser = fund;
@@ -138,7 +138,7 @@ const fundraiser = fund;
                 <div className="w-full flex justify-center">    
             <div className="w-5/6 gap-8 medium:flex justify-center ">
                 <div className="medium:w-2/3 flex flex-col">
-               <img className="w-full" src={`/bg.png`} />
+               <img alt="" className="w-full" src={`/bg.png`} />
 
 
   <div className="flex space-x-12 p-2">
@@ -197,7 +197,7 @@ const fundraiser = fund;
       </span>
     </button>
   </div>
-   <img className="h-72 w-full" src={`/qr.jpg`} />
+   <img alt="" className="h-72 w-full" src={`/qr.jpg`} />
 </div>
                    </div>
     </div>

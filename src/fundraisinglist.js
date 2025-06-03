@@ -1,42 +1,42 @@
-import react,{useState,useEffect,useCallback} from "react";
+import {useState} from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { NavLink } from "react-router-dom";
 
 const FundraisingList = ()=>{
-    const [progress, setProgress] = useState('40')
-    const [active,setActive]=useState(1)
+    // const [progress, setProgress] = useState('40')
+    // const [active,setActive]=useState(1)
     const [activeCategoryId, setActiveCategoryId] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState(null);
-        const [funds,setFunds] = useState()
-        const fetchRequest = useCallback(async () => {
+        // const [funds,setFunds] = useState()
+      //   const fetchRequest = useCallback(async () => {
     
-        try {
-          const token = localStorage.getItem('token');
-             const userId = localStorage.getItem('UserId');
-          if (!token) {
-            console.error('No token found in localStorage');
-            return;
-          }
-          const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/get-patient-details-status/APPROVED`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-           setFunds(data)
-          } else {
-            console.error('Failed to fetch user Image:', response.statusText);
-          }
-        } catch (error) {
-          console.error('Error fetching user Image:', error);
-        }
-      },[]);
+      //   try {
+      //     const token = localStorage.getItem('token');
+      //        const userId = localStorage.getItem('UserId');
+      //     if (!token) {
+      //       console.error('No token found in localStorage');
+      //       return;
+      //     }
+      //     const response = await fetch(`https://api-fundraiser.sadetechnosolutions.com/api/fund-raiser/get-patient-details-status/APPROVED`, {
+      //       method: 'GET',
+      //       headers: {
+      //         'Authorization': `Bearer ${token}`,
+      //       },
+      //     });
+      //     if (response.ok) {
+      //       const data = await response.json();
+      //      setFunds(data)
+      //     } else {
+      //       console.error('Failed to fetch user Image:', response.statusText);
+      //     }
+      //   } catch (error) {
+      //     console.error('Error fetching user Image:', error);
+      //   }
+      // },[]);
     
-      useEffect(()=>{
-        fetchRequest();
-      },[])
+      // useEffect(()=>{
+      //   fetchRequest();
+      // },[])
     
     const handleActiveCategory = (id)=>{
         // If the clicked category is already active, deactivate it; otherwise, activate it.
@@ -44,21 +44,21 @@ const FundraisingList = ()=>{
     };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-const [screenSize, setScreenSize] = useState({
-  width: window.innerWidth,
-  height: window.innerHeight,
-});
+// const [screenSize, setScreenSize] = useState({
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+// });
 
-useEffect(() => {
-  const handleResize = () => {
-    setScreenSize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  };
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, []);
+// useEffect(() => {
+//   const handleResize = () => {
+//     setScreenSize({
+//       width: window.innerWidth,
+//       height: window.innerHeight,
+//     });
+//   };
+//   window.addEventListener('resize', handleResize);
+//   return () => window.removeEventListener('resize', handleResize);
+// }, []);
 
     const categories = [
         {
@@ -185,7 +185,7 @@ useEffect(() => {
         </button>
         </div>
 {categories.map((category)=>{
-      const Icon = activeCategoryId === category.id ? category.icon.active : category.icon.inactive;
+      // const Icon = activeCategoryId === category.id ? category.icon.active : category.icon.inactive;
       const isActive = activeCategoryId === category.id;
       const IconComponent = isActive ? category.icon.active : category.icon.inactive;
     return(<div onClick={()=>{handleActiveCategory(category.id)}} className={`rounded-md cursor-pointer ${activeCategoryId === category.id ? 'bg-background text-white' :' bg-gray-100'} flex items-center gap-3  h-10 px-4 w-full`}>
@@ -210,7 +210,7 @@ useEffect(() => {
     <div className="absolute top-1 left-0 p-1 w-24 bg-background rounded-br-full rounded-tr-full">
         <span className="text-white">{fund.topic}</span>
     </div>
-<img className="w-full h-44 small:h-40 medium:h-40 sl:h-44 med:h-44 xl:h-48 rounded-tr-md rounded-tl-md" src="bg.png" />
+<img alt="" className="w-full h-44 small:h-40 medium:h-40 sl:h-44 med:h-44 xl:h-48 rounded-tr-md rounded-tl-md" src="bg.png" />
 <div className="flex flex-col gap-2 p-3">
 <p className="text-base  font-[600]">{fund.heading}</p>
 <span className="line-clamp-2 hidden sl:flex text-sm">{fund.description}</span>
@@ -218,8 +218,8 @@ useEffect(() => {
 <span className="text-background text-sm sl:text-base font-[600]"> {fund.amount}</span>
 <div className="flex items-center">
 <div className="relative flex items-center w-16 h-8 ">
-<img src="persona1.jpg" className="rounded-full w-6 h-6 absolute left-2 border-white" />
-<img src="persona2.jpg" className="rounded-full w-7 h-7 absolute left-6 border-white border-2   " />
+<img alt="" src="persona1.jpg" className="rounded-full w-6 h-6 absolute left-2 border-white" />
+<img  alt="" src="persona2.jpg" className="rounded-full w-7 h-7 absolute left-6 border-white border-2   " />
 </div>
 <span className="text-sm">{fund.supporters}</span>
 </div>

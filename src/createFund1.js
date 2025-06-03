@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useRef } from "react";
+import { useEffect } from "react";
 import Navbar from "./navbar";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -9,10 +9,10 @@ const BasicDetails = () => {
 
     const dispatch = useDispatch()
   const navigate = useNavigate();
-const [screenSize, setScreenSize] = useState({
-  width: window.innerWidth,
-  height: window.innerHeight,
-});
+// const [screenSize, setScreenSize] = useState({
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+// });
 
   const handleChange = (e) => {
   const { name, value } = e.target;
@@ -33,18 +33,18 @@ const [screenSize, setScreenSize] = useState({
     navigate('/Medicaldetails');
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setScreenSize({
+  //       width: window.innerWidth,
+  //       height: window.innerHeight,
+  //     });
+  //   };
+  //   window.addEventListener('resize', handleResize);
+  //   return () => window.removeEventListener('resize', handleResize);
+  // }, []);
 
-const fileInputRef = useRef(null);
+// const fileInputRef = useRef(null);
 const handleImageChange = (e) => {
   const file = e.target.files?.[0];
   if (file) {
@@ -55,9 +55,9 @@ const handleImageChange = (e) => {
 
 
 
-const triggerFileInput = () => {
-  fileInputRef.current.click();
-};
+// const triggerFileInput = () => {
+//   fileInputRef.current.click();
+// };
 const image = useSelector((state) => state.form.profileimg?.url);
 
 

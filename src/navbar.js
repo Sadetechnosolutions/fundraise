@@ -5,12 +5,12 @@ import { useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = useState(false);
+  // const [showDropdown, setShowDropdown] = useState(false);
   const [menu, setMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const handleMenu = () => setMenu(!menu);
-  const handleProfileClick = () => setShowProfileMenu(!showProfileMenu);
+  // const handleProfileClick = () => setShowProfileMenu(!showProfileMenu);
 
   const openFund = () => navigate("/Basicdetails");
   const openLogin = () => navigate("/Signup");
@@ -64,7 +64,7 @@ const location = useLocation()
           <NavLink
             key={header.id}
             to={header.path}
-            onClick={() => setShowDropdown(false)}
+            // onClick={() => setShowDropdown(false)}
             className={({ isActive }) =>
               `block px-4 py-2 text-gray-800 hover:border-b-2 hover:border text-white ${
                 isActive ? "border-[#EB373F]" : "border-none"

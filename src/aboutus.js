@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+
 import Navbar from "./navbar";
 import { Icon } from "@iconify/react/dist/iconify.js";
 
@@ -45,7 +45,7 @@ human being to rise with the right support.
 create second chances.
                         </span>
                            </div>
-                        <img className="medium:w-1/2 medium:h-96" src='about.png' />
+                        <img  alt="" className="medium:w-1/2 medium:h-96" src='about.png' />
                         </div>
 
 
@@ -57,19 +57,19 @@ create second chances.
         <span>Our Mission</span>
       </div>
       <div className="flex items-start gap-2">
-<img className="w-7 h-7" src="bulletin.png" />
+<img  alt="" className="w-7 h-7" src="bulletin.png" />
         <span className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
  Our mission is simple yet powerful: To empower change, one donation at a time.
         </span>
       </div>
       <div className="flex items-start gap-2">
-<img className="w-7 h-7" src="bulletin.png" />
+<img  alt="" className="w-7 h-7" src="bulletin.png" />
                 <span className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
     We are committed to transparency, accountability, and the ethical handling of all contributions.
         </span>
       </div>
       <div className="flex items-start gap-2">
-<img className="w-7 h-7" src="bulletin.png" />
+<img  alt="" className="w-7 h-7" src="bulletin.png" />
                 <p className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
           Every rupee donated goes directly towards improving lives and creating a lasting impact in the communities we serve.
         </p>
@@ -80,7 +80,7 @@ create second chances.
 
   <div className="medium:w-1/3">
 
-        <img className="w-full " src="about.jpg" />
+        <img  alt="" className="w-full " src="about.jpg" />
   </div>
 
 
@@ -88,7 +88,7 @@ create second chances.
 
 <div className="medium:flex-row flex flex-col px-8 justify-between medium:w-5/6 items-center">
   <div className="medium:w-1/3">
-        <img className="" src="about.jpg" />
+        <img  alt="" className="" src="about.jpg" />
   </div>
 
   <div className="medium:w-1/2 flex flex-col gap-6 sl:gap-12">
@@ -97,7 +97,7 @@ create second chances.
         Who We Are
       </div>
       <div className="flex itr gap-2">
-        <img className="w-7 h-7" src="bulletin.png" />
+        <img alt="" className="w-7 h-7" src="bulletin.png" />
         <p className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
         We started this platform with a simple yet powerful belief: 
 no one should face life’s toughest battles alone
@@ -105,7 +105,7 @@ no one should face life’s toughest battles alone
       </div>
 
       <div className="flex items- gap-2">
-          <img className="w-7 h-7" src="bulletin.png" />
+          <img  alt="" className="w-7 h-7" src="bulletin.png" />
                           <p className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
         We started this platform with a simple yet powerful belief: 
 no one should face life’s toughest battles alone
@@ -113,7 +113,7 @@ no one should face life’s toughest battles alone
 </div>
 
       <div className="flex items- gap-2">
-          <img className="w-7 h-7" src="bulletin.png" />
+          <img  alt="" className="w-7 h-7" src="bulletin.png" />
                 <p className="sl:text-xl text-gray-700 font-[600] leading-relaxed">
         We started this platform with a simple yet powerful belief: 
 no one should face life’s toughest battles alone

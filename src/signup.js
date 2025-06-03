@@ -1,4 +1,4 @@
-import react,{useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import TextField from '@mui/material/TextField';
 import Modal from 'react-modal';
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -9,7 +9,7 @@ const Signup = ()=>{
   const navigate = useNavigate()
   const [phonenumber,setPhoneNumber] = useState('')
   const [otp, setOtp] = useState(Array(6).fill(''));
-  const [user,setUser] = useState({ name: '', email: '', phoneNumber:'', password:'', confirmPassword:'' });
+  // const [user,setUser] = useState({ name: '', email: '', phoneNumber:'', password:'', confirmPassword:'' });
   const [siginOtp,showSigninOtp] = useState(false);
   const [seconds, setSeconds] = useState(300)
 
@@ -66,9 +66,19 @@ const Signup = ()=>{
         }
 
         const handlecloseotp = ()=>{
-    setUser({ name: '', email: '', phoneNumber: '', password: '', confirmPassword: '' });
+    // setUser({ name: '', email: '', phoneNumber: '', password: '', confirmPassword: '' });
     showSigninOtp(false);
   }
+
+    useEffect(() => {
+    if (seconds === 0) return;
+
+    const timer = setInterval(() => {
+      setSeconds(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, [seconds]);
   
   useEffect(() => {
   const setVh = () => {

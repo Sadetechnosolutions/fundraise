@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useCallback} from "react";
+import {useState,useEffect,useCallback} from "react";
 import { useParams } from "react-router-dom";
 
 const Requestdetails = ()=>{
@@ -8,7 +8,7 @@ const Requestdetails = ()=>{
     
         try {
           const token = localStorage.getItem('token');
-             const userId = localStorage.getItem('UserId');
+            //  const userId = localStorage.getItem('UserId');
           if (!token) {
             console.error('No token found in localStorage');
             return;
@@ -29,13 +29,13 @@ const Requestdetails = ()=>{
         } catch (error) {
           console.error('Error fetching user Image:', error);
         }
-      },[]);
+      },[id]);
 
               const updateRequest = useCallback(async (status) => {
     
         try {
           const token = localStorage.getItem('token');
-             const userId = localStorage.getItem('UserId');
+            //  const userId = localStorage.getItem('UserId');
           if (!token) {
             console.error('No token found in localStorage');
             return;
@@ -56,11 +56,11 @@ const Requestdetails = ()=>{
         } catch (error) {
           console.error('Error fetching user Image:', error);
         }
-      },[]);
+      },[id]);
     
       useEffect(()=>{
         fetchRequest();
-      },[])
+      },[fetchRequest])
     return(
         <div>
 
