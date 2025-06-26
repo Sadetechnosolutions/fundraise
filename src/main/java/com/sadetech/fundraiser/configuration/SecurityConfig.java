@@ -40,7 +40,9 @@ public class SecurityConfig {
                                 "/api/fund-raiser/send-otp-to-mobile",
                                 "/api/fund-raiser/verify-otp-login",
                                 "/api/fund-raiser/google-register",
-                                "/api/fund-raiser/uploads/**"
+                                "/api/fund-raiser/uploads/**",
+                                "/api/fund-raiser/get-health",
+                                "/api/fund-raiser/admin/login"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

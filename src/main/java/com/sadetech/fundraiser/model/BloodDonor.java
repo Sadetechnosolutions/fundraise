@@ -1,10 +1,12 @@
 package com.sadetech.fundraiser.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -18,7 +20,9 @@ public class BloodDonor {
     @Column(nullable = true)
     private Long userId;
     private String fullName;
+    @Column(unique = true)
     private String phoneNumber;
+    @Column(unique = true)
     private String email;
     private String bloodGroup;
     private String alternateMobileNumber;
@@ -28,5 +32,7 @@ public class BloodDonor {
     private String city;
     private String townOrVillage;
     private String pinCode;
+    @CreationTimestamp
+    private LocalDate enrolledAt;
 
 }

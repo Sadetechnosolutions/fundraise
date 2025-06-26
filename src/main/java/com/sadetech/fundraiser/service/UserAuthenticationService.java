@@ -10,13 +10,17 @@ import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class UserAuthenticationService {
@@ -715,7 +719,7 @@ public class UserAuthenticationService {
             throw new IllegalArgumentException("Patient info status already updated.");
         }
 
-        if (basicInfo.getStatus() == Status.PENDING) {
+        if (basicInfo.getStatus() == Status.PENDING || basicInfo.getStatus() == Status.VERIFICATION) {
             basicInfo.setStatus(status);
             basicInfo.setMessage(message);
             basicInfo.setUpdatedAt(LocalDateTime.now());
@@ -890,5 +894,56 @@ public class UserAuthenticationService {
 
         return "Roles updated successfully";
     }
+
+    public LoginResponse loginForAdmin(AdminLogin adminLogin) {
+        LoginResponse response = new LoginResponse();
+
+        if(adminLogin.getEmail() == null || adminLogin.getEmail().isBlank()){
+            throw new InvalidInputException("Email should not be empty");
+        }
+
+        if(adminLogin.getPassword() == null || adminLogin.getPassword().isBlank()){
+            throw new InvalidInputException("Password should not be empty");
+        }
+
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+        // Validate email
+        if (adminLogin.getEmail() != null) {
+            if (!emailPattern.matcher(adminLogin.getEmail()).matches()) {
+                throw new InvalidInputException("Please enter a valid email.");
+            }
+            if (adminLogin.getEmail().length() > 50) {
+                throw new InvalidInputException("Email must not exceed 50 characters.");
+            }
+        }
+
+        if (adminLogin.getPassword().length() < 8) {
+            throw new WeakPasswordException("Password must be at least 8 characters long");
+        }
+
+        // First check if user exists
+        var user = userRepository.findByEmail(adminLogin.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("Email not registered"));
+
+        // Then validate password
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(adminLogin.getEmail(), adminLogin.getPassword()));
+        } catch (BadCredentialsException ex) {
+            throw new InvalidCredentialsException("Incorrect password");
+        }
+
+        // Generate tokens
+        var jwt = jwtUtils.generateToken(user);
+        var refreshToken = jwtUtils.generateRefreshToken(user);
+
+        response.setToken(jwt);
+        response.setRefreshToken(refreshToken);
+        response.setMessage("Successfully Logged In");
+
+        return response;
+    }
+
 
 }   // End of UserAuthenticationService class

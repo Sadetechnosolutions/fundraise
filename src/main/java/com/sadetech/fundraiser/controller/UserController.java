@@ -42,6 +42,17 @@ public class UserController {
     @Value("${upload.dir}")
     private String uploadDir;
 
+    @PostMapping("/admin/login")
+    public ResponseEntity<LoginResponse> loginForAdmin(@RequestBody AdminLogin adminLogin){
+        LoginResponse response = userAuthenticationService.loginForAdmin(adminLogin);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/get-health")
+    public ApiResponse checkHealth(){
+        return new ApiResponse("Connected successfully");
+    }
+
     @PostMapping("/google-register")
     public ResponseEntity<LoginResponse> registerWithGoogle(@RequestBody GoogleAuthRequest request) {
         LoginResponse user = userAuthenticationService.checkUserAndRegisterWithOAuth(
@@ -173,7 +184,7 @@ public class UserController {
             @PathVariable Long id,
             @RequestParam String status,
             @RequestParam String message
-    ) {
+    ){
             Status enumStatus = Status.valueOf(status.trim().toUpperCase());
             String response = userAuthenticationService.updatePatientInfoDetailsStatus(id, enumStatus, message);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse(response));
